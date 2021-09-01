@@ -6,7 +6,20 @@ import numpy as np
 
 path = os.getcwd()
 
-finalexcelsheet = pd.read_excel(path + "\Combined Form Data.xlsx")
+try:
+    finalexcelsheet = pd.read_excel(path + "\Combined Form Data.xlsx")
+except:
+    workbook = xlsxwriter.Workbook('Combined Form Data.xlsx')
+    workbook.close()
+    finalexcelsheet = pd.read_excel(path + "\Combined Form Data.xlsx")
+
+extract = path + "\Extract Complete"
+if not os.path.exists(extract):
+    os.makedirs(extract)
+
+append = path + "\Append Complete"
+if not os.path.exists(append):
+    os.makedirs(append)
 
 #print(path)
 
