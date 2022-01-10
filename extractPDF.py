@@ -1,9 +1,7 @@
-import PyPDF2 as pydf
 from PyPDF2 import PdfFileReader
 import glob, os, shutil, xlsxwriter
 import pandas as pd
 import numpy as np
-import extract_msg
 import win32com.client
 
 path = os.getcwd()
@@ -26,22 +24,6 @@ if not os.path.exists(append):
 emails = path + "\Old Emails"
 if not os.path.exists(emails):
     os.makedirs(emails)
-
-#print(path)
-
-#for file in glob.glob(path + "\*.msg"):
-    #msg = extract_msg.openMsg(file)
-    #outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-    #msg = outlook.OpenSharedItem(file)        
-    #att = msg.attachments
-    #for i in att:
-        #i.SaveAsFile(os.path.join(path, i.FileName))
-
-    #filename = file[len(path)+1:]
-
-    #print(filename)
-    #print('path: ',  path + "\Old Emails\Completed - " + filename)
-    #shutil.move(file, path + "\Old Emails\Completed - " + filename)
 
 for file in glob.glob(path + "\*.msg"):
     filename = file[len(path)+1:]
