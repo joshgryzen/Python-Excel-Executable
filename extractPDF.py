@@ -82,11 +82,24 @@ for file in glob.glob(path + "\*.pdf"):
 
     workbook.close()
 
-    filename = file[len(path)+1:]
-
     #print(filename)
     #print('path: ',  path + "\Extract Complete\Completed - " + filename)
-    shutil.move(file, path + "\Extract Complete\Completed - " + filename)
+    
+    filename = file[len(path)+1:]
+    newFile = (path + "\Extract Complete\Completed - " + filename)
+
+    def checkNameExtract(name, dup):
+        for file in glob.glob(path + "\Extract Complete\*.pdf"):
+            if file == name:
+                dup = dup + 1
+                name = os.path.join(path + "\Extract Complete\Completed - " + str(dup) + " - " + filename)
+                return checkNameExtract(name, dup)
+        print(name)
+        return name
+    
+    newFile = checkNameExtract(newFile, 0)
+
+    shutil.move(file, newFile)
 
 for file in glob.glob(path + "\*.xlsx"):
     if file != (path + "\Combined Form Data.xlsx"):
@@ -96,7 +109,19 @@ for file in glob.glob(path + "\*.xlsx"):
         finalexcelsheet.to_excel(path + "\Combined Form Data.xlsx", index = False)
 
         filename = file[len(path)+1:]
+        newFile = (path + "\Append Complete\Completed - " + filename)
 
-        print(filename)
-        print('path: ',  path + "\Appended Complete\Appended - " + filename)
-        shutil.move(file, path + "\Append Complete\Completed - " + filename)
+        def checkNameAppend(name, dup):
+            for file in glob.glob(path + "\Append Complete\*.xlsx"):
+                if file == name:
+                    dup = dup + 1
+                    name = os.path.join(path + "\Append Complete\Completed - " + str(dup) + " - " + filename)
+                    return checkNameAppend(name, dup)
+            print(name)
+            return name
+
+        newFile = checkNameAppend(newFile, 0)
+
+        print(newFile)
+        print('path: ',  newFile)
+        shutil.move(file, newFile)
