@@ -1,8 +1,8 @@
-import PyPDF2 as pydf
 from PyPDF2 import PdfFileReader
 import glob, os, shutil, xlsxwriter
 import pandas as pd
 import numpy as np
+import win32com.client
 
 path = os.getcwd()
 
@@ -21,7 +21,31 @@ append = path + "\Append Complete"
 if not os.path.exists(append):
     os.makedirs(append)
 
-#print(path)
+emails = path + "\Old Emails"
+if not os.path.exists(emails):
+    os.makedirs(emails)
+
+for file in glob.glob(path + "\*.msg"):
+    filename = file[len(path)+1:]
+    movedFile = path + "\Old Emails\Completed - " + filename
+    shutil.move(file, movedFile)
+
+    outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+    msg = outlook.OpenSharedItem(movedFile)        
+    att = msg.attachments
+    for i in att:
+        name = os.path.join(path, i.FileName)
+        dup = 0
+
+        def checkName(name, dup):
+            for file in glob.glob(path + "\*.pdf"):
+                if file == name:
+                    dup = dup + 1
+                    name = os.path.join(path, str(dup) + " - " + i.FileName)
+                    return checkName(name, dup)
+            return name
+
+        i.SaveAsFile(checkName(name, dup))
 
 for file in glob.glob(path + "\*.pdf"):
     
@@ -58,11 +82,24 @@ for file in glob.glob(path + "\*.pdf"):
 
     workbook.close()
 
+    #print(filename)
+    #print('path: ',  path + "\Extract Complete\Completed - " + filename)
+    
     filename = file[len(path)+1:]
+    newFile = (path + "\Extract Complete\Completed - " + filename)
 
-    print(filename)
-    print('path: ',  path + "\Extract Complete\Completed - " + filename)
-    shutil.move(file, path + "\Extract Complete\Completed - " + filename)
+    def checkNameExtract(name, dup):
+        for file in glob.glob(path + "\Extract Complete\*.pdf"):
+            if file == name:
+                dup = dup + 1
+                name = os.path.join(path + "\Extract Complete\Completed - " + str(dup) + " - " + filename)
+                return checkNameExtract(name, dup)
+        print(name)
+        return name
+    
+    newFile = checkNameExtract(newFile, 0)
+
+    shutil.move(file, newFile)
 
 for file in glob.glob(path + "\*.xlsx"):
     if file != (path + "\Combined Form Data.xlsx"):
@@ -72,7 +109,19 @@ for file in glob.glob(path + "\*.xlsx"):
         finalexcelsheet.to_excel(path + "\Combined Form Data.xlsx", index = False)
 
         filename = file[len(path)+1:]
+        newFile = (path + "\Append Complete\Completed - " + filename)
 
-        print(filename)
-        print('path: ',  path + "\Appended Complete\Appended - " + filename)
-        shutil.move(file, path + "\Append Complete\Completed - " + filename)
+        def checkNameAppend(name, dup):
+            for file in glob.glob(path + "\Append Complete\*.xlsx"):
+                if file == name:
+                    dup = dup + 1
+                    name = os.path.join(path + "\Append Complete\Completed - " + str(dup) + " - " + filename)
+                    return checkNameAppend(name, dup)
+            print(name)
+            return name
+
+        newFile = checkNameAppend(newFile, 0)
+
+        print(newFile)
+        print('path: ',  newFile)
+        shutil.move(file, newFile)
